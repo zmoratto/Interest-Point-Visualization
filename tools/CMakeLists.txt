@@ -46,6 +46,13 @@ target_link_libraries(surf2vwip
   ${VisionWorkbench_LIBRARIES})
 set(PROGRAM_LISTING ${PROGRAM_LISTING} surf2vwip)
 
+# ip_print
+add_executable(ip_print ip_print.cc)
+target_link_libraries(ip_print
+  ${Boost_LIBRARIES}
+  ${VisionWorkbench_LIBRARIES})
+set(PROGRAM_LISTING ${PROGRAM_LISTING} ip_print)
+
 foreach( PROGRAM ${PROGRAM_LISTING} )
 
   message("Working:")
