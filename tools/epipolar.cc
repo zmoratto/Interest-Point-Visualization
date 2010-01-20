@@ -93,7 +93,8 @@ int main( int argc, char *argv[] ) {
         std::vector<Vector3> ipl, ipr;
         std::cout << ipl.size() << "\n";
         for ( uint k = 0; k < 7; k++ ) {
-          uint temp = (ipl.size()-1)*k/6;
+          uint temp = float(ip1.size()-1)*float(k)/6.0;
+          std::cout << "Pushing back index: " << temp << "\n";
           ipl.push_back(Vector3(ip1[temp].x,ip1[temp].y,1));
           ipr.push_back(Vector3(ip2[temp].x,ip2[temp].y,1));
         }
@@ -101,7 +102,16 @@ int main( int argc, char *argv[] ) {
 
         // Solving for fundamental matrix
         Fundamental7FittingFunctor func;
-        Matrix<double> fundie = func(ipl,ipr);
+        try {
+          Matrix<double> fundie = func(ipl,ipr);
+        } catch( vw::Exception& e ) {
+          std::cout << "Errored out: " << e.what() << "\n";
+          std::cout << "--- used input ---\n";
+          for ( uint i = 0; i < ipl.size(); i++ ) {
+            std::cout << "\t" << ipl[i] << " + " << ipr[i] << "\n";
+          }
+          return 1;
+        }
         std::cout << "Num sol: " << func.num_solutions() << "\n";
 
         // Loading images
@@ -112,6 +122,8 @@ int main( int argc, char *argv[] ) {
 
         // Draw RGB lines for each solution
         for ( uint sol = 0; sol < func.num_solutions(); sol++ ) {
+
+          Matrix<double> fundie = func.fundamental_matrix(sol);
 
           PixelRGB<uint8> color;
           switch(sol) {
