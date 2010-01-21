@@ -91,14 +91,11 @@ int main( int argc, char *argv[] ) {
 
         // Selecting 7
         std::vector<Vector3> ipl, ipr;
-        std::cout << ipl.size() << "\n";
         for ( uint k = 0; k < 7; k++ ) {
           uint temp = float(ip1.size()-1)*float(k)/6.0;
-          std::cout << "Pushing back index: " << temp << "\n";
-          ipl.push_back(Vector3(ip1[temp].x,ip1[temp].y,1));
-          ipr.push_back(Vector3(ip2[temp].x,ip2[temp].y,1));
+          ipl.push_back(Vector3(ip1[temp].ix,ip1[temp].iy,1));
+          ipr.push_back(Vector3(ip2[temp].ix,ip2[temp].iy,1));
         }
-        std::cout << ipl.size() << "\n";
 
         // Solving for fundamental matrix
         Fundamental7FittingFunctor func;
@@ -124,6 +121,7 @@ int main( int argc, char *argv[] ) {
         for ( uint sol = 0; sol < func.num_solutions(); sol++ ) {
 
           Matrix<double> fundie = func.fundamental_matrix(sol);
+          std::cout << "Fundie: " << fundie << "\n";
 
           PixelRGB<uint8> color;
           switch(sol) {
