@@ -45,6 +45,7 @@ int main( int argc, char *argv[] ) {
 
   po::options_description general_options("Options");
   general_options.add_options()
+    ("use-8p", "Use the 8p normalized algorithm");
     ("help", "brings up this" );
 
   po::options_description hidden_options("");
@@ -91,16 +92,30 @@ int main( int argc, char *argv[] ) {
 
         // Selecting 7
         std::vector<Vector3> ipl, ipr;
-        for ( uint k = 0; k < 7; k++ ) {
-          uint temp = float(ip1.size()-1)*float(k)/6.0;
-          ipl.push_back(Vector3(ip1[temp].ix,ip1[temp].iy,1));
-          ipr.push_back(Vector3(ip2[temp].ix,ip2[temp].iy,1));
+        if ( vm.count("use-8p") ) {
+          for ( uint k = 0; k < 8; k++ ) {
+            uint temp = float(ip1.size()-1)*float(k)/7.0;
+            ipl.push_back(Vector3(ip1[temp].ix,ip1[temp].iy,1));
+            ipr.push_back(Vector3(ip2[temp].ix,ip2[temp].iy,1));
+          }
+        } else {
+          for ( uint k = 0; k < 7; k++ ) {
+            uint temp = float(ip1.size()-1)*float(k)/6.0;
+            ipl.push_back(Vector3(ip1[temp].ix,ip1[temp].iy,1));
+            ipr.push_back(Vector3(ip2[temp].ix,ip2[temp].iy,1));
+          }
         }
 
         // Solving for fundamental matrix
-        Fundamental7FittingFunctor func;
+        Matrix<double> fundie;
         try {
-          Matrix<double> fundie = func(ipl,ipr);
+          if ( vm.count("use-8p") ) {
+            Fundamental8FittingFunctor func;
+            fundie = func(ipl,ipr);
+          } else {
+            Fundamental7FittingFunctor func;
+            fundie = func(ipl,ipr);
+          }
         } catch( vw::Exception& e ) {
           std::cout << "Errored out: " << e.what() << "\n";
           std::cout << "--- used input ---\n";
@@ -109,7 +124,7 @@ int main( int argc, char *argv[] ) {
           }
           return 1;
         }
-        std::cout << "Num sol: " << func.num_solutions() << "\n";
+        //std::cout << "Num sol: " << func.num_solutions() << "\n";
 
         // Loading images
         DiskImageView<PixelRGB<uint8> > src1(input_file_names[i]);
@@ -118,9 +133,10 @@ int main( int argc, char *argv[] ) {
         ImageView<PixelRGB<uint8> > new2 = src2;
 
         // Draw RGB lines for each solution
-        for ( uint sol = 0; sol < func.num_solutions(); sol++ ) {
-
-          Matrix<double> fundie = func.fundamental_matrix(sol);
+        //for ( uint sol = 0; sol < func.num_solutions(); sol++ ) {
+        {
+          uint sol = 0;
+          //Matrix<double> fundie = func.fundamental_matrix(sol);
           std::cout << "Fundie: " << fundie << "\n";
 
           PixelRGB<uint8> color;

@@ -54,7 +54,7 @@ int main( int argc, char *argv[] ) {
   usage << "Usage: " << argv[0] << " <image> <image> <image> [options] ...\n\n";
   usage << general_options << std::endl;
 
-  if ( vm.count("help") ) {
+  if ( vm.count("help") || !input_file_names.size() ) {
     std::cout << general_options << std::endl;
     return 1;
   }
