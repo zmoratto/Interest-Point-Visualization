@@ -23,3 +23,4 @@ link_directories(
 # Subdirectories
 add_subdirectory(tools)
 
+set(CMAKE_BUILD_TYPE Release)

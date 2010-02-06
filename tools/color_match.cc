@@ -29,11 +29,11 @@ int main( int argc, char *argv[] ) {
 
   std::vector<std::string> input_file_names;
   std::string output;
-  int scalar;
+  float scalar;
 
   po::options_description general_options("Options");
   general_options.add_options()
-    ("reduce,r", po::value<int>(&scalar)->default_value(1), "Reduce scale")
+    ("reduce,r", po::value<float>(&scalar)->default_value(1), "Reduce scale")
     ("output-prefix,o",po::value<std::string>(&output)->default_value("matched.png"), "Output prefix");
 
   po::options_description hidden_options("");
@@ -82,8 +82,8 @@ int main( int argc, char *argv[] ) {
 
         DiskImageView<PixelRGB<uint8> > src1(input_file_names[i]);
         DiskImageView<PixelRGB<uint8> > src2(input_file_names[j]);
-        ImageViewRef<PixelRGB<uint8> > s_src1 = subsample(src1.impl(),scalar);
-        ImageViewRef<PixelRGB<uint8> > s_src2 = subsample(src2.impl(),scalar);
+        ImageViewRef<PixelRGB<uint8> > s_src1 = resample(src1.impl(),1/scalar);
+        ImageViewRef<PixelRGB<uint8> > s_src2 = resample(src2.impl(),1/scalar);
         
         std::cout << "Compositing:\n";
 
