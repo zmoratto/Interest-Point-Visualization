@@ -44,12 +44,13 @@ int main( int argc, char *argv[] ){
 
   std::vector<std::string> input_file_names;
   std::string output_prefix;
-  float scalar;
+  float scalar, scale_ip;
 
   po::options_description general_options("Options");
   general_options.add_options()
     ("output-prefix,o",po::value<std::string>(&output_prefix)->default_value("color_ip_"), "Output prefix")
     ("reduce,r",po::value<float>(&scalar)->default_value(2), "Scalar to reduce image by")
+    ("scaleip,s",po::value<float>(&scale_ip)->default_value(1), "Scale that ip circle by this")
     ("help,h","Brings up this.");
 
   po::options_description hidden_options("");
@@ -132,7 +133,7 @@ int main( int argc, char *argv[] ){
                               point->iy/scalar);
       oimage(loc.x(),loc.y()) = color;
 
-      float scale = 2*point->scale/scalar;
+      float scale = 2*scale_ip*point->scale/scalar;
 
       // Circling point
       for (float a = 0; a < 6; a+=.392 ) {
@@ -153,7 +154,7 @@ int main( int argc, char *argv[] ){
     }
 
     std::cout << "Writing: " << output.str() << "\n";
-    write_image( output.str(), oimage );
+    write_image( output.str(), oimage, TerminalProgressCallback() );
 
     //DiskImageResource *rsrc = DiskImageResource::create( output.str(),
     //                                                     oimage.format() );
