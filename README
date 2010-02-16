@@ -1,0 +1,3 @@
+Interest Point Visualization: Tools for viewing results of the Interest Point Module from NASA's Vision Workbench
+
+These are tools that have made my life easier for debugging the IP module. I also use it on a regular base to spot errors in matches used for Bundle Adjustment. Maybe it can be of use for more people?

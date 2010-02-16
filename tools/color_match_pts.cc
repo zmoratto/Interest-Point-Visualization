@@ -37,6 +37,7 @@ int main( int argc, char *argv[] ){
   std::string match_file_name;
   std::string input1_file_name, input2_file_name;
   std::string output_prefix;
+  int scalar;
 
   po::options_description general_options("Options");
   general_options.add_options()
@@ -44,6 +45,7 @@ int main( int argc, char *argv[] ){
     ("input2,i2", po::value<std::string>(&input2_file_name), "Input file 2")
     ("match,m", po::value<std::string>(&match_file_name), "Match file")
     ("output-prefix,o",po::value<std::string>(&output_prefix)->default_value("color_pts_"), "Output prefix")
+    ("reduce,r", po::value<int>(&scalar)->default_value(1), "Reduce scale")
     ("help,h", "Help");
 
   po::positional_options_description p;
@@ -90,25 +92,26 @@ int main( int argc, char *argv[] ){
 
   // Rasterize points
   vw::ImageView<vw::PixelRGB<vw::uint8> > oimage1 = 
-    0.5*pixel_cast<PixelGray<uint8> >( channel_cast_rescale<uint8>( dsk_image1.impl() ) );
+    resample(0.5*pixel_cast<PixelGray<uint8> >( channel_cast_rescale<uint8>( dsk_image1.impl() ) ),1.0/float(scalar) );
   vw::ImageView<vw::PixelRGB<vw::uint8> > oimage2 =
-    0.5*pixel_cast<PixelGray<uint8> >( channel_cast_rescale<uint8>( dsk_image2.impl() ) );
+    resample(0.5*pixel_cast<PixelGray<uint8> >( channel_cast_rescale<uint8>( dsk_image2.impl() ) ),1.0/float(scalar) );
 
   for (unsigned i = 0; i < ip1.size(); ++i){
     PixelHSV<uint8> hsv_color(255*float(i)/float(ip1.size()), 255, 255);
     PixelRGB<uint8> write_color(hsv_color);
 
-    oimage1(ip1[i].x,ip1[i].y) = write_color;
-    oimage2(ip2[i].x,ip2[i].y) = write_color;
+    oimage1(ip1[i].x/scalar,ip1[i].y/scalar) = write_color;
+    oimage2(ip2[i].x/scalar,ip2[i].y/scalar) = write_color;
 
     // Make circle in second image
     for ( float a = 0; a < 6; a += .392 ) {
       float a_d = a + .392;
-      Vector2i start( int(5*cos(a)+ip2[i].x),
-                      int(5*sin(a)+ip2[i].y) );
-      Vector2i end( int(5*cos(a_d)+ip2[i].x),
-                    int(5*sin(a_d)+ip2[i].y) );
+      Vector2i start( int(5*cos(a)+ip2[i].x/scalar),
+                      int(5*sin(a)+ip2[i].y/scalar) );
+      Vector2i end( int(5*cos(a_d)+ip2[i].x/scalar),
+                    int(5*sin(a_d)+ip2[i].y/scalar) );
       Vector2i conversion = Vector2i(ip1[i].x,ip1[i].y) - Vector2i(ip2[i].x,ip2[i].y);
+      conversion /= scalar;
       draw_line( oimage2, write_color, start, end );
       draw_line( oimage1, write_color, start+conversion, end+conversion );
     }
