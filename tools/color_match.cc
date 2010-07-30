@@ -34,7 +34,8 @@ int main( int argc, char *argv[] ) {
   po::options_description general_options("Options");
   general_options.add_options()
     ("reduce,r", po::value<float>(&scalar)->default_value(1), "Reduce scale")
-    ("output-prefix,o",po::value<std::string>(&output)->default_value("matched.png"), "Output prefix");
+    ("output-prefix,o",po::value<std::string>(&output)->default_value("matched.png"), "Output prefix")
+    ("help,h","Show this");
 
   po::options_description hidden_options("");
   hidden_options.add_options()
