@@ -53,14 +53,6 @@ target_link_libraries(ip_print
   ${VisionWorkbench_LIBRARIES})
 set(PROGRAM_LISTING ${PROGRAM_LISTING} ip_print)
 
-# epipolar
-add_executable(epipolar epipolar.cc)
-target_link_libraries(epipolar
-  ${Boost_LIBRARIES}
-  ${VisionWorkbench_LIBRARIES}
-  ${LAPACK_LIBRARIES})
-set(PROGRAM_LISTING ${PROGRAM_LISTING} epipolar)
-
 message("Procesing:")
 foreach( PROGRAM ${PROGRAM_LISTING} )
 
