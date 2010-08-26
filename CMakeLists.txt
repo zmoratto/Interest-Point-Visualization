@@ -4,6 +4,22 @@ project(IPVisualization CXX C)
 cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH "${IPVisualization_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
+# Setting up RPATH
+set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" )
+
+set( CMAKE_SKIP_RPATH                   FALSE CACHE BOOL "" )
+set( CMAKE_SKIP_BUILD_RPATH             FALSE CACHE BOOL "" )
+set( CMAKE_BUILD_WITH_INSTALL_RPATH     FALSE CACHE BOOL "" )
+set( CMAKE_INSTALL_RPATH_USE_LINK_PATH  TRUE  CACHE BOOL "" )
+
+mark_as_advanced(
+  CMAKE_INSTALL_RPATH
+  CMAKE_SKIP_RPATH
+  CMAKE_SKIP_BUILD_RPATH
+  CMAKE_BUILD_WITH_INSTALL_RPATH
+  CMAKE_INSTALL_RPATH_USE_LINK_PATH
+)
+
 # Defining packages
 find_package(Boost REQUIRED
   COMPONENTS program_options system thread filesystem)
