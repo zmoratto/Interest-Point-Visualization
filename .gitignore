@@ -1,0 +1,13 @@
+CMakeCache.txt
+Makefile
+CMakeFiles
+cmake_install.cmake
+install_manifest.txt
+
+tools/color_ip
+tools/color_match
+tools/color_match_pts
+tools/ip_print
+tools/localized_norm
+tools/statistics_find
+tools/surf2vwip
