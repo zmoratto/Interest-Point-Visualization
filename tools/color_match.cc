@@ -35,6 +35,7 @@ int main( int argc, char *argv[] ) {
   general_options.add_options()
     ("reduce,r", po::value<float>(&scalar)->default_value(1), "Reduce scale")
     ("output-prefix,o",po::value<std::string>(&output)->default_value("matched.png"), "Output prefix")
+    ("jpeg", "Output in JPEG format.")
     ("help,h","Show this");
 
   po::options_description hidden_options("");
@@ -114,8 +115,12 @@ int main( int argc, char *argv[] ) {
 
         std::string output_image =
           prefix_from_filename(input_file_names[i]) + "__" +
-          prefix_from_filename(input_file_names[j]) + ".png";
-        write_image( output_image, comp );
+          prefix_from_filename(input_file_names[j]) + ".";
+	if (vm.count("jpeg")) {
+	  write_image( output_image+"jpg", comp );
+	} else {
+	  write_image( output_image+"png", comp );
+	}
       }
     }
   }
