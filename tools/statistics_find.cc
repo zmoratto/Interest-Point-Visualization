@@ -18,9 +18,9 @@ static void remove_duplicates( std::vector<InterestPoint> &ip1,
                                std::vector<InterestPoint> &ip2 ) {
   std::vector<InterestPoint> new_ip1, new_ip2;
 
-  for (unsigned i = 0; i < ip1.size(); ++i ) {
+  for (size_t i = 0; i < ip1.size(); ++i ) {
     bool bad_entry = false;
-    for (unsigned j=i; j < ip1.size(); ++j ) {
+    for (size_t j = i; j < ip1.size(); ++j ) {
       if (i != j &&
           ((ip1[i].x == ip1[j].x && ip1[i].y == ip1[j].y) ||
            (ip2[i].x == ip2[j].x && ip2[i].y == ip2[j].y)))
@@ -63,11 +63,13 @@ int main( int argc, char *argv[] ){
 
   std::string match_file_name;
   std::string output_prefix;
+  size_t inlier_threshold;
 
   po::options_description general_options("Options");
   general_options.add_options()
-    ("match,m", po::value<std::string>(&match_file_name), "Match file")
-    ("output-prefix,o", po::value<std::string>(&output_prefix), "Output Prefix")
+    ("match,m", po::value(&match_file_name), "Match file")
+    ("output-prefix,o", po::value(&output_prefix), "Output Prefix")
+    ("inlier_threshold,i", po::value(&inlier_threshold), "Inlier threshold")
     ("help,h", "Gives you this screen");
 
   po::positional_options_description p;
@@ -106,23 +108,25 @@ int main( int argc, char *argv[] ){
     //remove_duplicates( ip1, ip2 );
     std::vector<Vector3> ransac_ip1( ip1.size() );
     std::vector<Vector3> ransac_ip2( ip2.size() );
-    for ( unsigned i = 0; i < ip1.size(); ++i ) {
+    for ( size_t i = 0; i < ip1.size(); ++i ) {
       ransac_ip1[i] = Vector3( ip1[i].x, ip1[i].y, 1 );
       ransac_ip2[i] = Vector3( ip2[i].x, ip2[i].y, 1 );
     }
-    math::RandomSampleConsensus< math::HomographyFittingFunctor,math::InterestPointErrorMetric> ransac( math::HomographyFittingFunctor(),
-                                                                                                        math::InterestPointErrorMetric(),
-                                                                                            20 ); //inlier_threshold
+
+    typedef math::RandomSampleConsensus< math::HomographyFittingFunctor,math::InterestPointErrorMetric> ransac_t;
+    ransac_t ransac( math::HomographyFittingFunctor(),
+                     math::InterestPointErrorMetric(),
+                     inlier_threshold );
     Matrix<double> T = ransac( ransac_ip1, ransac_ip2 );
     std::cout << "\t> T = " << T << std::endl;
 
-    std::vector<int> indices;
+    std::vector<size_t> indices;
     indices = ransac.inlier_indices(T, ransac_ip1, ransac_ip2 );
 
     std::cout << "\t> Found " << indices.size() << " acceptable matches.\n";
 
     std::vector<InterestPoint> final_ip1, final_ip2;
-    for ( unsigned i=0; i < indices.size(); ++i ) {
+    for ( size_t i=0; i < indices.size(); ++i ) {
       final_ip1.push_back( ip1[ indices[i] ] );
       final_ip2.push_back( ip2[ indices[i] ] );
     }
@@ -133,7 +137,7 @@ int main( int argc, char *argv[] ){
   // Find bounding box
   std::cout << "Building Bounding Boxes:\n";
   BBox2i first_bbox;
-  for (unsigned i = 0; i < ip1.size(); ++i) {
+  for (size_t i = 0; i < ip1.size(); ++i) {
     first_bbox.grow( Vector2( ip1[i].x, ip1[i].y ) );
   }
   Vector2 min = first_bbox.min();
@@ -147,8 +151,8 @@ int main( int argc, char *argv[] ){
 
   // Calculating Statistics
   std::cout << "Gathering Statistics:\n";
-  for (unsigned b = 0; b < bboxes.size(); ++b ) {
-    for (unsigned i = 0; i < ip1.size(); ++i ) {
+  for (size_t b = 0; b < bboxes.size(); ++b ) {
+    for (size_t i = 0; i < ip1.size(); ++i ) {
       if ( bboxes[b].contains( Vector2( ip1[i].x, ip1[i].y )) )
         histogram[b] += 1;
     }
@@ -157,7 +161,7 @@ int main( int argc, char *argv[] ){
 
   float mean = 0.0;
   float sum = 0.0;
-  for (unsigned b = 0; b < histogram.size(); ++b ) {
+  for (size_t b = 0; b < histogram.size(); ++b ) {
     mean += histogram[b];
     if ( bboxes[b].width() > 0 && bboxes[b].height() > 0 )
       sum++;
@@ -165,7 +169,7 @@ int main( int argc, char *argv[] ){
   mean /= sum;
 
   float std_dev = 0.0;
-  for (unsigned b = 0; b < histogram.size(); ++b ) {
+  for (size_t b = 0; b < histogram.size(); ++b ) {
     if ( bboxes[b].width() > 0 && bboxes[b].height() > 0 )
       std_dev += (histogram[b] - mean)*(histogram[b] - mean);
   }
@@ -182,4 +186,6 @@ int main( int argc, char *argv[] ){
 
     write_binary_match_file( ostr.str(), ip1, ip2 );
   }
+
+  return 0;
 }
