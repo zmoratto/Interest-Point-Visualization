@@ -116,9 +116,9 @@ int main( int argc, char *argv[] ){
                     int(5*sin(a_d)+ip2[i].y/scalar) );
       Vector2i conversion = Vector2i(ip1[i].x,ip1[i].y) - Vector2i(ip2[i].x,ip2[i].y);
       conversion /= scalar;
-      if ( bbox1.contains( start ) && bbox1.contains( end ) )
+      if ( bbox2.contains( start ) && bbox2.contains( end ) )
         draw_line( oimage2, write_color, start, end );
-      if ( bbox2.contains( start+conversion ) && bbox2.contains( end+conversion ) )
+      if ( bbox1.contains( start+conversion ) && bbox1.contains( end+conversion ) )
         draw_line( oimage1, write_color, start+conversion, end+conversion );
     }
   }

@@ -28,13 +28,14 @@ static std::string prefix_from_filename(std::string const& filename) {
 int main( int argc, char *argv[] ) {
 
   std::vector<std::string> input_file_names;
-  std::string output;
-  float scalar;
+  std::string output, match_file;
+  int scalar;
 
   po::options_description general_options("Options");
   general_options.add_options()
-    ("reduce,r", po::value<float>(&scalar)->default_value(1), "Reduce scale")
-    ("output-prefix,o",po::value<std::string>(&output)->default_value("matched.png"), "Output prefix")
+    ("reduce,r", po::value(&scalar)->default_value(1), "Reduce scale")
+    ("output-prefix,o",po::value(&output)->default_value("matched.png"), "Output prefix")
+    ("match-file", po::value(&match_file), "Define if you want to draw a specific match file.")
     ("jpeg", "Output in JPEG format.")
     ("help,h","Show this");
 
@@ -63,12 +64,15 @@ int main( int argc, char *argv[] ) {
 
   std::cout << "Using scale: " << scalar << std::endl;
 
-  for ( uint i = 0; i < input_file_names.size(); ++i ) {
-    for ( uint j = i+1; j < input_file_names.size(); ++j ) {
+  for ( size_t i = 0; i < input_file_names.size(); ++i ) {
+    for ( size_t j = i+1; j < input_file_names.size(); ++j ) {
 
       std::string output_filename =
         prefix_from_filename(input_file_names[i]) + "__" +
         prefix_from_filename(input_file_names[j]) + ".match";
+
+      if ( !match_file.empty() )
+        output_filename = match_file;
 
       if ( fs::exists( output_filename ) ) {
         // Loading up points
@@ -84,14 +88,13 @@ int main( int argc, char *argv[] ) {
 
         DiskImageView<PixelRGB<uint8> > src1(input_file_names[i]);
         DiskImageView<PixelRGB<uint8> > src2(input_file_names[j]);
-        ImageViewRef<PixelRGB<uint8> > s_src1 = resample(src1.impl(),1/scalar);
-        ImageViewRef<PixelRGB<uint8> > s_src2 = resample(src2.impl(),1/scalar);
-        
+        ImageViewRef<PixelRGB<uint8> > s_src1( subsample(src1,scalar) ),
+          s_src2( subsample(src2,scalar) );
         std::cout << "Compositing:\n";
 
         mosaic::ImageComposite<PixelRGB<uint8> > composite;
         composite.insert(s_src1,0,0);
-        composite.insert(s_src2,s_src1.impl().cols(),0);
+        composite.insert(s_src2,s_src1.cols(),0);
         composite.set_draft_mode( true );
         composite.prepare();
 
@@ -101,7 +104,7 @@ int main( int argc, char *argv[] ) {
         std::cout << "Drawing lines:\n";
 
         // Draw Red Line
-        for ( unsigned int k = 0; k < ip1.size(); ++k ) {
+        for ( size_t k = 0; k < ip1.size(); ++k ) {
           Vector2 start( ip1[k].x/scalar, ip1[k].y/scalar );
           Vector2 end( ip2[k].x/scalar+s_src1.impl().cols(), ip2[k].y/scalar );
           for ( float r=0; r<1.0; r+=1/norm_2(end-start) ) {
@@ -116,11 +119,11 @@ int main( int argc, char *argv[] ) {
         std::string output_image =
           prefix_from_filename(input_file_names[i]) + "__" +
           prefix_from_filename(input_file_names[j]) + ".";
-	if (vm.count("jpeg")) {
-	  write_image( output_image+"jpg", comp );
-	} else {
-	  write_image( output_image+"png", comp );
-	}
+        if (vm.count("jpeg")) {
+          write_image( output_image+"jpg", comp );
+        } else {
+          write_image( output_image+"png", comp );
+        }
       }
     }
   }
