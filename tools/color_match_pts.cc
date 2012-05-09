@@ -65,14 +65,13 @@ int main( int argc, char *argv[] ){
     std::cout << general_options << std::endl;
     return 1;
   } else if ( (vm.count("input1") != 1) &&
-	      (vm.count("input2") != 1) &&
-	      (vm.count("match") != 1) ) {
+              (vm.count("input2") != 1) &&
+              (vm.count("match") != 1) ) {
     std::cout << "You are missing an argument\n";
     std::cout << usage.str();
     return 1;
   }
 
-  // Code Monkey!
   std::vector<InterestPoint> ip1, ip2;
   DiskImageView<PixelRGB<uint8> > dsk_image1( input1_file_name );
   DiskImageView<PixelRGB<uint8> > dsk_image2( input2_file_name );
@@ -91,17 +90,22 @@ int main( int argc, char *argv[] ){
   output2 << output_prefix << input2_file_name;
 
   // Rasterize points
-  vw::ImageView<vw::PixelRGB<vw::uint8> > oimage1 = 
-    resample(0.5*pixel_cast<PixelGray<uint8> >( channel_cast_rescale<uint8>( dsk_image1.impl() ) ),1.0/float(scalar) );
+  vw::ImageView<vw::PixelRGB<vw::uint8> > oimage1 =
+    subsample( 0.5*pixel_cast<PixelGray<uint8> >( channel_cast_rescale<uint8>( dsk_image1 ) ), scalar );
   vw::ImageView<vw::PixelRGB<vw::uint8> > oimage2 =
-    resample(0.5*pixel_cast<PixelGray<uint8> >( channel_cast_rescale<uint8>( dsk_image2.impl() ) ),1.0/float(scalar) );
+    subsample( 0.5*pixel_cast<PixelGray<uint8> >( channel_cast_rescale<uint8>( dsk_image2 ) ), scalar );
 
-  for (unsigned i = 0; i < ip1.size(); ++i){
+  BBox2i bbox1 = bounding_box( oimage1 ),
+    bbox2 = bounding_box( oimage2 );
+
+  for (size_t i = 0; i < ip1.size(); ++i){
     PixelHSV<uint8> hsv_color(255*float(i)/float(ip1.size()), 255, 255);
     PixelRGB<uint8> write_color(hsv_color);
 
-    oimage1(ip1[i].x/scalar,ip1[i].y/scalar) = write_color;
-    oimage2(ip2[i].x/scalar,ip2[i].y/scalar) = write_color;
+    if ( bbox1.contains( Vector2i( ip1[i].x, ip1[i].y ) / scalar ) )
+      oimage1(ip1[i].x/scalar,ip1[i].y/scalar) = write_color;
+    if ( bbox2.contains( Vector2i( ip2[i].x, ip2[i].y ) / scalar ) )
+      oimage2(ip2[i].x/scalar,ip2[i].y/scalar) = write_color;
 
     // Make circle in second image
     for ( float a = 0; a < 6; a += .392 ) {
@@ -112,11 +116,15 @@ int main( int argc, char *argv[] ){
                     int(5*sin(a_d)+ip2[i].y/scalar) );
       Vector2i conversion = Vector2i(ip1[i].x,ip1[i].y) - Vector2i(ip2[i].x,ip2[i].y);
       conversion /= scalar;
-      draw_line( oimage2, write_color, start, end );
-      draw_line( oimage1, write_color, start+conversion, end+conversion );
+      if ( bbox1.contains( start ) && bbox1.contains( end ) )
+        draw_line( oimage2, write_color, start, end );
+      if ( bbox2.contains( start+conversion ) && bbox2.contains( end+conversion ) )
+        draw_line( oimage1, write_color, start+conversion, end+conversion );
     }
   }
 
   write_image( output1.str(), oimage1 );
   write_image( output2.str(), oimage2 );
+
+  return 0;
 }
