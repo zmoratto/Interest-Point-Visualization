@@ -1,6 +1,8 @@
 //boost
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 namespace po = boost::program_options;
+namespace fs = boost::filesystem;
 
 //standard
 #include <iostream>
@@ -84,11 +86,6 @@ int main( int argc, char *argv[] ){
     return 1;
   }
 
-  // Creating the ouput file name;
-  std::ostringstream output1, output2;
-  output1 << output_prefix << input1_file_name;
-  output2 << output_prefix << input2_file_name;
-
   // Rasterize points
   vw::ImageView<vw::PixelRGB<vw::uint8> > oimage1 =
     subsample( 0.5*pixel_cast<PixelGray<uint8> >( channel_cast_rescale<uint8>( dsk_image1 ) ), scalar );
@@ -123,8 +120,8 @@ int main( int argc, char *argv[] ){
     }
   }
 
-  write_image( output1.str(), oimage1 );
-  write_image( output2.str(), oimage2 );
+  write_image( output_prefix + fs::basename( input1_file_name ) + ".png", oimage1 );
+  write_image( output_prefix + fs::basename( input2_file_name ) + ".png", oimage2 );
 
   return 0;
 }

@@ -21,6 +21,7 @@ mark_as_advanced(
 )
 
 # Defining packages
+set(Boost_DEBUG True)
 find_package(Boost REQUIRED
   COMPONENTS program_options system thread filesystem)
 find_package(VisionWorkbench REQUIRED

@@ -116,7 +116,7 @@ int main( int argc, char *argv[] ){
     typedef math::RandomSampleConsensus< math::HomographyFittingFunctor,math::InterestPointErrorMetric> ransac_t;
     ransac_t ransac( math::HomographyFittingFunctor(),
                      math::InterestPointErrorMetric(),
-                     inlier_threshold );
+                     inlier_threshold, 10, true );
     Matrix<double> T = ransac( ransac_ip1, ransac_ip2 );
     std::cout << "\t> T = " << T << std::endl;
 
