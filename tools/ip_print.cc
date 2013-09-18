@@ -58,14 +58,14 @@ int main( int argc, char *argv[] ){
       ip = read_binary_ip_file(input_file_name);
       vw_out() << "VWIP file: \"" << input_file_name << "\"\n";
       for ( uint i = 0; i < ip.size(); i++ )
-        vw_out() << "\t(" << ip[i].x << ", " << ip[i].y << ")\n";
+        vw_out() << "\t(" << ip[i].x << ", " << ip[i].y << ", " << ip[i].scale << ")\n";
     } else if ( boost::iends_with(input_file_name,".match") ) {
       std::vector<InterestPoint> ip1, ip2;
       read_binary_match_file(input_file_name,ip1,ip2);
       vw_out() << "MATCH file: \"" << input_file_name << "\"\n";
       for ( uint i = 0; i < ip1.size(); i++ )
-        vw_out() << "\t(" << ip1[i].x << ", " << ip1[i].y << ")-("
-                 << ip2[i].x << ", " << ip2[i].y << ")\n";
+        vw_out() << "\t(" << ip1[i].x << ", " << ip1[i].y << ", " << ip1[i].scale << ")-("
+                 << ip2[i].x << ", " << ip2[i].y << ", " << ip2[i].scale << ")\n";
     }
     vw_out() << "\n";
   }
