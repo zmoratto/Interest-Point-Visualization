@@ -17,6 +17,14 @@ target_link_libraries(color_match
   ${VisionWorkbench_LIBRARIES})
 set(PROGRAM_LISTING ${PROGRAM_LISTING} color_match)
 
+
+# Anaglyph Match
+add_executable(anaglyph_match anaglyph_match.cc)
+target_link_libraries(anaglyph_match
+  ${Boost_LIBRARIES}
+  ${VisionWorkbench_LIBRARIES})
+set(PROGRAM_LISTING ${PROGRAM_LISTING} anaglyph_match)
+
 # Color Match Pts
 add_executable(color_match_pts color_match_pts.cc)
 target_link_libraries(color_match_pts
